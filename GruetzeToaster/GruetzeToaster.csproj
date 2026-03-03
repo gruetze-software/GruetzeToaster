@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Version>1.0.0</Version>
+    <AssemblyName>gruetzetoaster</AssemblyName>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
+    <Authors>Grütze-Software</Authors>
+    <Product>GrützeToaster</Product>
+    <PackageIcon>gstoastericon.ico</PackageIcon>
+    <ApplicationIcon>Assets/gstoastericon.ico</ApplicationIcon>
+    <Description>GrützeToaster is a retro-themed screensaver for Windows, Linux and MacOS, featuring animated toasters and toast. Perfect for your retro computing setup.</Description>
+    <Copyright>Copyright © 2026 Grütze-Software</Copyright>
+    <Maintainer>schaefer.christoph@posteo.de</Maintainer>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageId>gruetzetoaster</PackageId>
+    <PackageProjectUrl>https://github.com/gruetze-software/gruetzetoaster</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/gruetze-software/gruetzetoaster.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.12" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.12" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.12" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.12" />
+    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.12">
+      <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+      <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>

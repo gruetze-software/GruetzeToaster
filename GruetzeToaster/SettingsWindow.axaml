@@ -1,0 +1,60 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="GruetzeToaster.SettingsWindow"
+        Title="Grütze-Software Toaster Setup"
+        Width="500" Height="600"
+        WindowStartupLocation="CenterScreen"
+        Background="#1a1a1a" Foreground="White"
+        CanResize="true">
+    
+    <StackPanel Margin="25" Spacing="10">
+        <Image Name="LogoImage" Width="100" Height="100" 
+               HorizontalAlignment="Center"
+               RenderOptions.BitmapInterpolationMode="None" />
+        
+        <TextBlock Text="Grütze-Software Toaster Setup" 
+                   FontSize="18" FontWeight="Bold" 
+                   HorizontalAlignment="Center" Foreground="Yellow" Margin="0,0,0,5"/>
+        
+        <Separator Background="#444" Margin="0,5"/>
+
+        <TextBlock Text="Toaster Count:" FontSize="12" FontWeight="SemiBold" Margin="0,5,0,0"/>
+        <Grid ColumnDefinitions="*, 50">
+            <Slider Name="CountSlider" Grid.Column="0" Minimum="10" Maximum="200" 
+                    TickFrequency="10" IsSnapToTickEnabled="True" VerticalAlignment="Center"/>
+            <TextBlock Name="CountLabel" Grid.Column="1" Text="35" 
+                       VerticalAlignment="Center" HorizontalAlignment="Right" 
+                       FontSize="12" Foreground="Yellow"/>
+        </Grid>
+
+        <TextBlock Text="Speed:" FontSize="12" FontWeight="SemiBold" Margin="0,5,0,0"/>
+        <Grid ColumnDefinitions="*, 50">
+            <Slider Name="SpeedSlider" Grid.Column="0" Minimum="0.2" Maximum="5.0" VerticalAlignment="Center"/>
+            <TextBlock Name="SpeedLabel" Grid.Column="1" Text="1.0x" 
+                       VerticalAlignment="Center" HorizontalAlignment="Right" 
+                       FontSize="12" Foreground="Yellow"/>
+        </Grid>
+
+        <Button Content="Reset to Defaults" 
+                Click="Reset_Click" 
+                HorizontalAlignment="Center" 
+                FontSize="11" Padding="15,5"
+                Background="#3a3a3a" Foreground="White" 
+                BorderBrush="#555" BorderThickness="1"
+                Margin="0,15,0,10"/>
+
+        <Separator Background="#444" Margin="0,5"/>
+        
+        <StackPanel Spacing="1">
+            <TextBlock Name="VersionLabel" FontSize="11" Foreground="#888" HorizontalAlignment="Center"/>
+            <TextBlock Name="CopyrightLabel" FontSize="11" Foreground="#888" HorizontalAlignment="Center"/>
+            <TextBlock Name="DescriptionLabel" TextWrapping="Wrap" TextAlignment="Center"
+                       FontSize="10" Foreground="#666" Margin="0,5,0,0"/>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20" Margin="0,15,0,0">
+            <Button Content="Cancel" Click="Cancel_Click" Width="110" HorizontalContentAlignment="Center" Background="#444"/>
+            <Button Content="Save" Click="Save_Click" Width="110" HorizontalContentAlignment="Center" Background="#2e7d32" FontWeight="Bold"/>
+        </StackPanel>
+    </StackPanel>
+</Window>

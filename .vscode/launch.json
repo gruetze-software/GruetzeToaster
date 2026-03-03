@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": ".NET Debug: Settings Mode",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/GruetzeToaster/bin/Debug/net9.0/GruetzeToaster.dll",
+            "args": ["/c"],
+            "cwd": "${workspaceFolder}/GruetzeToaster",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        }
+    ]
+}

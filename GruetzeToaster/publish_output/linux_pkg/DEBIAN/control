@@ -1,0 +1,9 @@
+Package: gruetzetoaster
+Version: 1.0.0
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: schaefer.christoph@posteo.de
+Description: GrützeToaster Screensaver
+ Retro-themed screensaver with animated toasters for your terminal or desktop.
+ Built by Grütze-Software for retro computing enthusiasts.
