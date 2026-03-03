@@ -87,8 +87,8 @@ foreach ($target in $targets) {
             }
 
             # 4. Icon kopieren (falls vorhanden)
-            if (Test-Path "Assets/icon.icns") {
-                Copy-Item "Assets/icon.icns" -Destination "$resourcesDir/icon.icns"
+            if (Test-Path "Assets/gstoastericon.icns") {
+                Copy-Item "Assets/gstoastericon.icns" -Destination "$resourcesDir/gstoastericon.icns"
             }
         }
         Write-Host "FERTIG: $platformName Build liegt in $exportPath" -ForegroundColor Green

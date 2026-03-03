@@ -16,7 +16,7 @@
     <Product>GrützeToaster</Product>
     <PackageIcon>gstoastericon.ico</PackageIcon>
     <ApplicationIcon>Assets/gstoastericon.ico</ApplicationIcon>
-    <Description>GrützeToaster is a retro-themed screensaver for Windows, Linux and MacOS, featuring animated toasters and toast. Perfect for your retro computing setup.</Description>
+    <Description>GrützeToaster is a nostalgic tribute to the legendary 90s Flying Toasters.</Description>
     <Copyright>Copyright © 2026 Grütze-Software</Copyright>
     <Maintainer>schaefer.christoph@posteo.de</Maintainer>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
