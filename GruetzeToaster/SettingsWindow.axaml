@@ -48,6 +48,14 @@
         <StackPanel Spacing="1">
             <TextBlock Name="VersionLabel" FontSize="11" Foreground="#888" HorizontalAlignment="Center"/>
             <TextBlock Name="CopyrightLabel" FontSize="11" Foreground="#888" HorizontalAlignment="Center"/>
+            <TextBlock Text="GitHub Repository" 
+               FontSize="10" 
+               Foreground="#3498db" 
+               HorizontalAlignment="Center"
+               Cursor="Hand"
+               PointerPressed="GitLink_PointerPressed"
+               Margin="0,5,0,0"
+               TextDecorations="Underline"/>
             <TextBlock Name="DescriptionLabel" TextWrapping="Wrap" TextAlignment="Center"
                        FontSize="10" Foreground="#666" Margin="0,5,0,0"/>
         </StackPanel>

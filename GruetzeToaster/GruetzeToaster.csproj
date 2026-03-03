@@ -21,10 +21,17 @@
     <Maintainer>schaefer.christoph@posteo.de</Maintainer>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageId>gruetzetoaster</PackageId>
-    <PackageProjectUrl>https://github.com/gruetze-software/gruetzetoaster</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/gruetze-software/gruetzetoaster.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/gruetze-software/GruetzeToaster</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/gruetze-software/GruetzeToaster.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>RepositoryUrl</_Parameter1>
+      <_Parameter2>https://github.com/gruetze-software/GruetzeToaster</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />

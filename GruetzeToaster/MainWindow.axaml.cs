@@ -30,7 +30,10 @@ public partial class MainWindow : Window
     private DateTime _lastFpsUpdate = DateTime.Now;
     private Point? _lastMousePos;
 
-    public MainWindow(bool isPreview = false, IntPtr? parentHandle = null)
+    public MainWindow() : this(false, IntPtr.Zero) // Standard-Konstruktor für normalen Start
+    {  }
+
+    public MainWindow(bool isPreview, IntPtr? parentHandle)
     {
         IsPreviewMode = isPreview;
         ParentWindowHandle = parentHandle ?? IntPtr.Zero;
