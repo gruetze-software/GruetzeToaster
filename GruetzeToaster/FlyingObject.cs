@@ -29,7 +29,8 @@ namespace GruetzeToaster
             // 2. Reset-Logik: Verhindert den "Perlenschnur-Effekt"
             if (Position.Y > canvasHeight + 150 || Position.X < -200)
             {
-                Random r = new Random();
+                // Random.Shared ist threadsicher und erzeugt keine neue Instanz pro Frame
+            var r = Random.Shared;
                 // Wechselndes Spawning: Mal von oben, mal von rechts
                 if (r.Next(0, 2) == 0)
                 {

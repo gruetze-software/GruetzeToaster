@@ -24,10 +24,14 @@ public partial class MainWindow : Window
     private Bitmap _toast;
     private Bitmap _logo;
     private static Bitmap? _logogs = null; // Statischer Cache für das Logo, damit wir es in der Vorschau nutzen können
-    private DateTime _lastTickTime = DateTime.Now;
+    // TimeSpan statt DateTime.Now – nutzt den hochauflösenden Frame-Timestamp der GPU
+    private TimeSpan _lastTickTime = TimeSpan.Zero;
 
     private int _frameCount = 0;
-    private DateTime _lastFpsUpdate = DateTime.Now;
+    private TimeSpan _lastFpsUpdate = TimeSpan.Zero;
+
+    // Gecachtes Callback-Objekt: verhindert neue Lambda-Allokation pro Frame
+    private Action<TimeSpan>? _frameCallback;
     private Point? _lastMousePos;
 
     public MainWindow() : this(false, IntPtr.Zero) // Standard-Konstruktor für normalen Start
@@ -171,41 +175,44 @@ public partial class MainWindow : Window
 
     private void StartAnimationLoop(TopLevel topLevel)
     {
-        topLevel.RequestAnimationFrame(time =>
+        // Callback einmalig als Feld speichern: keine neue Lambda-Allokation pro Frame,
+        // kein unnötiger GC-Druck, keine Mikroruckler durch Garbage Collection.
+        _frameCallback = (time) =>
         {
-            // 1. Zeitberechnung (DeltaTime)
-            var now = DateTime.Now;
-            double deltaTime = (now - _lastTickTime).TotalSeconds;
-            
-            // Schutz vor Rucklern nach einem System-Hänger
-            if (deltaTime > 0.1) deltaTime = 0.016;
-            _lastTickTime = now;
+            // 1. Zeitberechnung mit dem hochauflösenden Frame-Timestamp (nicht DateTime.Now!)
+            //    _lastTickTime == Zero bedeutet: erster Frame, kein Delta berechnen
+            double deltaTime = _lastTickTime == TimeSpan.Zero
+                ? 0.016
+                : (time - _lastTickTime).TotalSeconds;
 
-            // 2. Deine Toaster-Update Logik
-            foreach (var obj in _objects) 
+            // Schutz vor Rucklern nach einem System-Hänger (z.B. Laptop-Deckel zu)
+            if (deltaTime > 0.1) deltaTime = 0.016;
+            _lastTickTime = time;
+
+            // 2. Toaster-Update
+            foreach (var obj in _objects)
             {
                 obj.Update(Bounds.Width, Bounds.Height, deltaTime, _toasterFrames);
             }
 
-            // 3. FPS-Anzeige aktualisieren - NUR WENN SICHTBAR
-            // Wir prüfen hier auf IsVisible, damit wir keine Rechenzeit verschwenden
-            // und keinen Fehler bekommen, wenn die Anzeige aus ist.
+            // 3. FPS-Anzeige – nur wenn sichtbar, um Rechenzeit zu sparen
             if (FpsDisplay != null && FpsDisplay.IsVisible)
             {
                 _frameCount++;
-                var elapsed = (now - _lastFpsUpdate).TotalSeconds;
+                double elapsed = (time - _lastFpsUpdate).TotalSeconds;
                 if (elapsed >= 0.5)
                 {
                     FpsDisplay.Text = $"FPS: {(_frameCount / elapsed):F1}";
                     _frameCount = 0;
-                    _lastFpsUpdate = now;
+                    _lastFpsUpdate = time;
                 }
             }
 
-            // 4. DER WICHTIGE TEIL: Den nächsten Frame anfordern
-            // Ohne diese Zeile würde die Animation nach einem Bild stehen bleiben.
-            StartAnimationLoop(topLevel);
-        });
+            // 4. Nächsten Frame anfordern – wiederverwendet dasselbe Callback-Objekt
+            topLevel.RequestAnimationFrame(_frameCallback!);
+        };
+
+        topLevel.RequestAnimationFrame(_frameCallback);
     }
 
     // Windows spezifischer Code, um das Fenster in den Preview-Modus zu versetzen

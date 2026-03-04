@@ -81,15 +81,42 @@ if build_target "linux-x64" "Linux"; then
     fi
 fi
 
-# macOS
+# macOS — läuft als eigenständige App (kein nativer .saver-Screensaver)
+# Hinweis: macOS unterstützt keine .NET/.saver-Bundles ohne Objective-C-Bridge.
+# Die App wird manuell gestartet und läuft im Vollbild als Screensaver-Ersatz.
 for rid in "osx-x64:macOS_Intel" "osx-arm64:macOS_ARM"; do
     IFS=":" read -r RID NAME <<< "$rid"
     if build_target "$RID" "$NAME"; then
-        APP_PATH="$DIST_DIR/$NAME/GruetzeToaster.app/Contents/MacOS"
-        mkdir -p "$APP_PATH"
-        mv "$DIST_DIR/$NAME/GruetzeToaster" "$APP_PATH/"
-        echo '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>CFBundleExecutable</key><string>GruetzeToaster</string><key>CFBundleName</key><string>GruetzeToaster</string><key>CFBundleVersion</key><string>'$VERSION'</string></dict></plist>' > "$DIST_DIR/$NAME/GruetzeToaster.app/Contents/Info.plist"
+        APP_BUNDLE="$DIST_DIR/$NAME/GruetzeToaster.app"
+        APP_MACOS="$APP_BUNDLE/Contents/MacOS"
+        APP_RES="$APP_BUNDLE/Contents/Resources"
+        mkdir -p "$APP_MACOS" "$APP_RES"
+        mv "$DIST_DIR/$NAME/GruetzeToaster" "$APP_MACOS/"
+
+        # Vollständiger Info.plist:
+        # NSHighResolutionCapable=true  → Retina-Schärfe auf M1/M2-Macs
+        # LSMinimumSystemVersion        → Mindest-macOS-Version (Ventura+)
+        # CFBundleIdentifier            → Benötigt für macOS-Sandbox
+        cat > "$APP_BUNDLE/Contents/Info.plist" << PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>        <string>GruetzeToaster</string>
+    <key>CFBundleName</key>              <string>GruetzeToaster</string>
+    <key>CFBundleDisplayName</key>       <string>Grütze Toaster</string>
+    <key>CFBundleIdentifier</key>        <string>de.gruetze-software.toaster</string>
+    <key>CFBundleVersion</key>           <string>$VERSION</string>
+    <key>CFBundleShortVersionString</key><string>$VERSION</string>
+    <key>CFBundlePackageType</key>       <string>APPL</string>
+    <key>LSMinimumSystemVersion</key>    <string>12.0</string>
+    <key>NSHighResolutionCapable</key>   <true/>
+</dict>
+</plist>
+PLIST
+
         (cd "$DIST_DIR/$NAME" && pack_archive "$RELEASE_DIR/${APP_NAME}_v${VERSION}_${NAME}.zip")
+        echo "✅ macOS $NAME gebaut (App-Bundle, manueller Start)."
     fi
 done
 
