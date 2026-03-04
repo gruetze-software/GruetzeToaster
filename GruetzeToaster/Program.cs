@@ -77,13 +77,20 @@ class Program
 
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()
-        => AppBuilder.Configure<App>()
-            .UsePlatformDetect()
-            .With(new Win32PlatformOptions
-            {
-                // Wir nutzen die modernen Namen für Windows 11
-                RenderingMode = new[] { Win32RenderingMode.AngleEgl, Win32RenderingMode.Software }
-            })
-            .WithInterFont()
-            .LogToTrace();
+    => AppBuilder.Configure<App>()
+        .UsePlatformDetect()
+        // Konfiguration für Windows
+        .With(new Win32PlatformOptions
+        {
+            RenderingMode = new[] { Win32RenderingMode.AngleEgl, Win32RenderingMode.Software }
+        })
+        // Konfiguration für Linux/WSL (getrennter Aufruf!)
+        .With(new X11PlatformOptions 
+        {
+            RenderingMode = new[] { X11RenderingMode.Software },
+            EnableMultiTouch = false, 
+            UseDBusMenu = false
+        })
+        .WithInterFont()
+        .LogToTrace();
 }

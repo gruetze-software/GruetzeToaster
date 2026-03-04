@@ -8,10 +8,10 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <AssemblyName>gruetzetoaster</AssemblyName>
-    <AssemblyVersion>1.0.0</AssemblyVersion>
-    <FileVersion>1.0.0</FileVersion>
+    <AssemblyVersion>1.0.1</AssemblyVersion>
+    <FileVersion>1.0.1</FileVersion>
     <Authors>Grütze-Software</Authors>
     <Product>GrützeToaster</Product>
     <PackageIcon>gstoastericon.ico</PackageIcon>

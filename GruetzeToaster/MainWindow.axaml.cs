@@ -74,17 +74,21 @@ public partial class MainWindow : Window
             }
         };
         
-        // Versteckt den Cursor
-        this.Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.None);
-
-        // Sorgt dafür, dass das Fenster wirklich ALLES überlagert
-        this.WindowState = WindowState.FullScreen;
-        this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-        this.Topmost = true; // Zwingt das Fenster über die Taskleiste
+        Trace.WriteLine($"MainWindow gestartet. Vorschau-Modus: {IsPreviewMode}, ParentHandle: {ParentWindowHandle}");
+        if ( !IsPreviewMode )
+        {
+            // Im normalen Modus wollen wir den Cursor verstecken, damit er nicht stört
+            this.Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.None);
         
-        // Entfernt jegliche System-Rahmen
-        this.SystemDecorations = SystemDecorations.None;
-        this.ExtendClientAreaToDecorationsHint = true;
+            // Sorgt dafür, dass das Fenster wirklich ALLES überlagert
+            this.WindowState = WindowState.FullScreen;
+            this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            this.Topmost = true; // Zwingt das Fenster über die Taskleiste
+        
+            // Entfernt jegliche System-Rahmen
+            this.SystemDecorations = SystemDecorations.None;
+            this.ExtendClientAreaToDecorationsHint = true;
+        }
         
         _toasterSheet = new Bitmap(AssetLoader.Open(new Uri("avares://GruetzeToaster/Assets/toaster-sprite.gif")));
         for (int i = 0; i < 4; i++)
