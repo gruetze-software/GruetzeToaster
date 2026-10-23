@@ -16,6 +16,7 @@ public partial class MainWindow : Window
     private readonly bool _windowed;
     private readonly ToasterSettings _settings;
     private readonly Random _random;
+    private readonly Action<TimeSpan> _frameCallback;
     private readonly FrameStatistics _frameTimes = new();
     private TimeSpan? _lastFrame;
     private double _fpsElapsed;
@@ -32,6 +33,7 @@ public partial class MainWindow : Window
         _windowed = windowed;
         _settings = settings ?? new ConfigManager().Settings;
         _random = random ?? Random.Shared;
+        _frameCallback = Animate;
         _settings.Validate();
         InitializeComponent();
         FpsDisplay.IsVisible = _settings.ShowFps;
@@ -96,7 +98,7 @@ public partial class MainWindow : Window
         if (WindowState == WindowState.Minimized)
         {
             _lastFrame = time;
-            RequestAnimationFrame(Animate);
+            RequestAnimationFrame(_frameCallback);
             return;
         }
         double elapsed = _lastFrame.HasValue ? Math.Max((time - _lastFrame.Value).TotalSeconds, 0) : 0;
@@ -117,7 +119,7 @@ public partial class MainWindow : Window
                 _fpsElapsed = 0;
             }
         }
-        RequestAnimationFrame(Animate);
+        RequestAnimationFrame(_frameCallback);
     }
 
     internal void AdvanceScene(double seconds)
@@ -144,7 +146,7 @@ public partial class MainWindow : Window
         else if (!_windowed) WindowState = WindowState.FullScreen;
         InitializeObjects();
         _running = true;
-        RequestAnimationFrame(Animate);
+        RequestAnimationFrame(_frameCallback);
     }
 
     protected override void OnClosed(EventArgs e)
