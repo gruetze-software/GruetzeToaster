@@ -13,7 +13,7 @@ public static class Tools
 {
     public static string GetVersion()
     {
-        // 1. Titelleiste aus Assembly-Infos
+        // Read the version from assembly metadata.
         var assembly = Assembly.GetExecutingAssembly();
         return assembly.GetName().Version?.ToString(3) ?? "1.0.0";
     }
@@ -42,7 +42,7 @@ public static class Tools
             return 0;
         }
 
-        // Vermeide Ganzzahldivision durch die Multiplikation mit 100.0 (einem double)
+        // Use floating-point division before converting to a percentage.
         return (int)((current / (double)total) * 100);
     }
 

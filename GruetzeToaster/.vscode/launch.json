@@ -10,7 +10,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/bin/Debug/net9.0/gruetzetoaster.dll",
+            "program": "${workspaceFolder}/bin/Debug/net10.0/gruetzetoaster.dll",
             "args": [],
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",

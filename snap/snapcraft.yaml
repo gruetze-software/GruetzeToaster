@@ -1,0 +1,38 @@
+name: gruetzetoaster
+title: GruetzeToaster
+base: core24
+version: '1.1.0'
+grade: devel
+confinement: strict
+license: MIT
+summary: Retro flying toaster animation
+description: |
+  A nostalgic flying toaster animation by Grütze-Software.
+  Configure the speed and number of objects, run fullscreen or in a window.
+  Optional retro computers feature a blinking red power light and a sliding floppy disk.
+  This application does not lock the session or install a native Linux screensaver.
+  Support development: https://ko-fi.com/gruetzesoftware
+website: https://github.com/gruetze-software/GruetzeToaster
+source-code: https://github.com/gruetze-software/GruetzeToaster
+issues: https://github.com/gruetze-software/GruetzeToaster/issues
+icon: GruetzeToaster/Assets/app-icon.png
+platforms:
+  amd64:
+apps:
+  gruetzetoaster:
+    command: usr/bin/gruetzetoaster
+    desktop: usr/share/applications/de.gruetze_software.GruetzeToaster.desktop
+    extensions: [gnome]
+    plugs: [desktop, wayland, x11, opengl]
+parts:
+  gruetzetoaster:
+    plugin: dump
+    source: artifacts/snap-payload
+    stage-packages:
+      - libicu74
+      - libssl3t64
+      - libunwind8
+      - liblttng-ust1t64
+      - libbrotli1
+      - libice6
+      - libsm6

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>de.gruetze_software.GruetzeToaster</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>GruetzeToaster</name>
+  <summary>A retro flying toaster animation</summary>
+  <description><p>Enjoy propeller toasters, toast and optional retro computers with configurable speed and object count.
+  The C64-style computer blinks its red power light; the Amiga-style computer slides a floppy disk in and out.
+  Runs fullscreen or in a window. This application does not lock your session.</p></description>
+  <launchable type="desktop-id">de.gruetze_software.GruetzeToaster.desktop</launchable>
+  <url type="homepage">https://github.com/gruetze-software/GruetzeToaster</url>
+  <url type="bugtracker">https://github.com/gruetze-software/GruetzeToaster/issues</url>
+  <url type="donation">https://ko-fi.com/gruetzesoftware</url>
+  <developer id="de.gruetze-software"><name>Grütze-Software</name></developer>
+  <provides><binary>gruetzetoaster</binary></provides>
+  <content_rating type="oars-1.1"/>
+  <screenshots><screenshot type="default">
+    <caption>Flying propeller toasters, toast, floppy disks and optional retro computers</caption>
+    <image>https://raw.githubusercontent.com/gruetze-software/GruetzeToaster/v1.1.0/docs/images/screensaver.png</image>
+  </screenshot></screenshots>
+  <releases><release version="1.1.0" date="2026-10-23"/></releases>
+</component>

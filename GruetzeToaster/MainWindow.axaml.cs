@@ -1,251 +1,166 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Runtime.InteropServices;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using Avalonia.Threading;
 
 namespace GruetzeToaster;
 
 public partial class MainWindow : Window
 {
-    public bool IsPreviewMode { get; set; } = false;
-    public IntPtr ParentWindowHandle { get; set; } = IntPtr.Zero;
-    private ConfigManager _configManager = new ConfigManager();
+    public bool IsPreviewMode { get; }
+    public IntPtr ParentWindowHandle { get; }
+    private readonly bool _windowed;
+    private readonly ToasterSettings _settings;
+    private readonly Random _random;
+    private readonly FrameStatistics _frameTimes = new();
+    private TimeSpan? _lastFrame;
+    private double _fpsElapsed;
+    private int _frameCount;
+    private Point? _initialMouse;
+    private bool _running;
 
-    private List<FlyingObject> _objects = new();
-    private IImage[] _toasterFrames = new IImage[4];
-    private Bitmap _toasterSheet;
-    private Bitmap _toast;
-    private Bitmap _logo;
-    private static Bitmap? _logogs = null; // Statischer Cache für das Logo, damit wir es in der Vorschau nutzen können
-    private DateTime _lastTickTime = DateTime.Now;
+    public MainWindow() : this(false, IntPtr.Zero) { }
 
-    private int _frameCount = 0;
-    private DateTime _lastFpsUpdate = DateTime.Now;
-    private Point? _lastMousePos;
-
-    public MainWindow() : this(false, IntPtr.Zero) // Standard-Konstruktor für normalen Start
-    {  }
-
-    public MainWindow(bool isPreview, IntPtr? parentHandle)
+    public MainWindow(bool isPreview, IntPtr? parentHandle, bool windowed = false, ToasterSettings? settings = null, Random? random = null)
     {
         IsPreviewMode = isPreview;
         ParentWindowHandle = parentHandle ?? IntPtr.Zero;
-
+        _windowed = windowed;
+        _settings = settings ?? new ConfigManager().Settings;
+        _random = random ?? Random.Shared;
+        _settings.Validate();
         InitializeComponent();
-
-        PointerMoved += (s, e) => 
+        FpsDisplay.IsVisible = _settings.ShowFps;
+        if (isPreview)
         {
-            if ( IsPreviewMode) return; // Im Vorschau-Modus ignorieren, damit die Mausbewegung die Anzeige nicht stört
+            WindowState = WindowState.Normal;
+            Topmost = false;
+            ShowInTaskbar = false;
+            Width = 160;
+            Height = 120;
+        }
+        else if (windowed)
+        {
+            WindowState = WindowState.Normal;
+            WindowDecorations = WindowDecorations.Full;
+            Topmost = false;
+            Width = 960;
+            Height = 600;
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        }
+        else
+        {
+            // Position is set by App before entering fullscreen.
+            WindowState = WindowState.Normal;
+            Cursor = new Cursor(StandardCursorType.None);
+            ShowInTaskbar = false;
+        }
 
-            var currentPos = e.GetPosition(this);
-            if (_lastMousePos == null) { _lastMousePos = currentPos; return; }
-
-            // Distanz berechnen (Satz des Pythagoras)
-            double dist = Math.Sqrt(Math.Pow(currentPos.X - _lastMousePos.Value.X, 2) + 
-                                    Math.Pow(currentPos.Y - _lastMousePos.Value.Y, 2));
-
-            if (dist > 10) Close(); // Erst bei 10 Pixel Bewegung schließen
+        PointerMoved += (_, e) =>
+        {
+            if (IsPreviewMode || _windowed) return;
+            Point current = e.GetPosition(this);
+            if (_initialMouse is not { } initial) { _initialMouse = current; return; }
+            double dx = current.X - initial.X, dy = current.Y - initial.Y;
+            if (dx * dx + dy * dy > 100) Close();
         };
-
-        // Event für Tastendrücke registrieren
-        this.KeyDown += (sender, e) =>
+        PointerPressed += (_, _) => { if (!IsPreviewMode && !_windowed) Close(); };
+        KeyDown += (_, e) =>
         {
-            // Nicht im Preview-Modus, damit wir die FPS-Anzeige nicht stören
             if (IsPreviewMode) return;
-
-            // Wenn 'F' gedrückt wird (F wie Frames)
-            if (e.Key == Avalonia.Input.Key.F)
+            if (e.Key == Key.F)
             {
-                // Schaltet zwischen True und False um
                 FpsDisplay.IsVisible = !FpsDisplay.IsVisible;
+                _frameCount = 0;
+                _fpsElapsed = 0;
+                _frameTimes.Reset();
             }
-            
-            // Bonus: Falls du mit ESC den Screensaver beenden willst
-            if (e.Key == Avalonia.Input.Key.Escape)
-            {
-                this.Close();
-            }
+            else if (!_windowed || e.Key == Key.Escape) Close();
         };
-        
-        Trace.WriteLine($"MainWindow gestartet. Vorschau-Modus: {IsPreviewMode}, ParentHandle: {ParentWindowHandle}");
-        if ( !IsPreviewMode )
-        {
-            // Im normalen Modus wollen wir den Cursor verstecken, damit er nicht stört
-            this.Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.None);
-        
-            // Sorgt dafür, dass das Fenster wirklich ALLES überlagert
-            this.WindowState = WindowState.FullScreen;
-            this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            this.Topmost = true; // Zwingt das Fenster über die Taskleiste
-        
-            // Entfernt jegliche System-Rahmen
-            this.SystemDecorations = SystemDecorations.None;
-            this.ExtendClientAreaToDecorationsHint = true;
-        }
-        
-        _toasterSheet = new Bitmap(AssetLoader.Open(new Uri("avares://GruetzeToaster/Assets/toaster-sprite.gif")));
-        for (int i = 0; i < 4; i++)
-        {       
-            // Wir schneiden 64x64 Pixel große Stücke aus dem Sheet
-            _toasterFrames[i] = new CroppedBitmap(_toasterSheet, new PixelRect(i * 64, 0, 64, 64));
-        }
-
-        _toast = new Bitmap(AssetLoader.Open(new Uri("avares://GruetzeToaster/Assets/toast1.gif")));
-        _logo = new Bitmap(AssetLoader.Open(new Uri("avares://GruetzeToaster/Assets/logo.gif")));
-        _logogs = new Bitmap(AssetLoader.Open(new Uri("avares://GruetzeToaster/Assets/logogs.png")));
-        
-        InitializeToasters();
-                
-        // Warte kurz, bis das Fenster bereit ist, dann starte den Loop
-        Dispatcher.UIThread.Post(() => 
-        {
-            var topLevel = TopLevel.GetTopLevel(this);
-            if (topLevel != null)
-            {
-                StartAnimationLoop(topLevel);
-            }
-        });
-        
     }
 
-    private void InitializeToasters()
+    private void InitializeObjects()
     {
-        var rand = new Random();
-        var canvasWidth = this.Bounds.Width > 0 ? this.Bounds.Width : 1920;
-        var canvasHeight = this.Bounds.Height > 0 ? this.Bounds.Height : 1080;
-        // 1. Anzahl reduzieren: Im Preview reichen 10-15 Toaster völlig aus
-        int countObj = IsPreviewMode ? 12 : _configManager.Settings.ToasterCount;
-        // 2. BaseSize im Preview massiv senken (ca. 30%)
-        // Das kompensiert den hohen depthFactor von bis zu 1.6
-        double baseSize = IsPreviewMode ? 64 * 0.3 : 64;
-
-        for (int i = 0; i < countObj; i++)
-        {
-            int typeRoll = rand.Next(0, 10);
-            bool isLogo = (typeRoll == 0);
-            bool isToast = (typeRoll == 1 || typeRoll == 2);
-
-            // Der depthFactor bestimmt alles: 0.4 (hinten/klein) bis 1.6 (vorne/groß)
-            double depthFactor = 0.4 + (rand.NextDouble() * 1.2);
-
-            FlyingObject obj = new FlyingObject
-            {
-                // Initial-Verteilung über einen riesigen Bereich (auch weit außerhalb)
-                Position = new Point(rand.Next(-500, (int)canvasWidth + 800), rand.Next(-800, (int)canvasHeight + 500)),
-                Speed = 2.5 * depthFactor * _configManager.Settings.SpeedMultiplier, // Schnelle Objekte sind IMMER groß
-                IsLogo = isLogo,
-                IsToast = isToast,
-                Frame = rand.Next(0, 4) // Zufälliger Start-Frame gegen "Gleichschritt"
-            };
-
-            // Größe basierend auf Tiefe
-            double finalSize = baseSize * depthFactor;
-            obj.DisplayImage.Width = finalSize;
-            obj.DisplayImage.Height = finalSize;
-
-            // Pixel-Art scharf halten (wichtig für C64 Look!)
-            RenderOptions.SetBitmapInterpolationMode(obj.DisplayImage, BitmapInterpolationMode.None);
-
-            // Z-Index: Vorne liegende Objekte verdecken hintere
-            obj.DisplayImage.SetValue(Canvas.ZIndexProperty, (int)(depthFactor * 100));
-
-            // Transparenz für Hintergrund-Objekte (Dunst-Effekt)
-            if (depthFactor < 0.8) obj.DisplayImage.Opacity = 0.6;
-
-            // Bild-Zuweisung
-            if (isLogo) obj.DisplayImage.Source = _logo;
-            else if (isToast) obj.DisplayImage.Source = _toast;
-            else obj.DisplayImage.Source = _toasterFrames[obj.Frame];
-
-            MainCanvas.Children.Add(obj.DisplayImage);
-            _objects.Add(obj);
-        }
+        double width = IsPreviewMode || Bounds.Width <= 0 ? Width : Bounds.Width;
+        double height = IsPreviewMode || Bounds.Height <= 0 ? Height : Bounds.Height;
+        Scene.Initialize(_settings, IsPreviewMode, width, height, _random);
     }
 
-    private void StartAnimationLoop(TopLevel topLevel)
+    private void Animate(TimeSpan time)
     {
-        topLevel.RequestAnimationFrame(time =>
+        if (!_running) return;
+        if (WindowState == WindowState.Minimized)
         {
-            // 1. Zeitberechnung (DeltaTime)
-            var now = DateTime.Now;
-            double deltaTime = (now - _lastTickTime).TotalSeconds;
-            
-            // Schutz vor Rucklern nach einem System-Hänger
-            if (deltaTime > 0.1) deltaTime = 0.016;
-            _lastTickTime = now;
-
-            // 2. Deine Toaster-Update Logik
-            foreach (var obj in _objects) 
+            _lastFrame = time;
+            RequestAnimationFrame(Animate);
+            return;
+        }
+        double elapsed = _lastFrame.HasValue ? Math.Max((time - _lastFrame.Value).TotalSeconds, 0) : 0;
+        double delta = Math.Min(elapsed, 0.1);
+        _lastFrame = time;
+        AdvanceScene(delta);
+        if (FpsDisplay.IsVisible && delta > 0)
+        {
+            _frameCount++;
+            _fpsElapsed += elapsed;
+            _frameTimes.Add(elapsed);
+            if (_fpsElapsed >= 0.5)
             {
-                obj.Update(Bounds.Width, Bounds.Height, deltaTime, _toasterFrames);
+                var timing = _frameTimes.Snapshot();
+                FpsDisplay.Text = FormattableString.Invariant(
+                    $"FPS: {_frameCount / _fpsElapsed:F1}  |  frame p95: {timing.P95Ms:F1} ms  |  max: {timing.MaxMs:F1} ms");
+                _frameCount = 0;
+                _fpsElapsed = 0;
             }
-
-            // 3. FPS-Anzeige aktualisieren - NUR WENN SICHTBAR
-            // Wir prüfen hier auf IsVisible, damit wir keine Rechenzeit verschwenden
-            // und keinen Fehler bekommen, wenn die Anzeige aus ist.
-            if (FpsDisplay != null && FpsDisplay.IsVisible)
-            {
-                _frameCount++;
-                var elapsed = (now - _lastFpsUpdate).TotalSeconds;
-                if (elapsed >= 0.5)
-                {
-                    FpsDisplay.Text = $"FPS: {(_frameCount / elapsed):F1}";
-                    _frameCount = 0;
-                    _lastFpsUpdate = now;
-                }
-            }
-
-            // 4. DER WICHTIGE TEIL: Den nächsten Frame anfordern
-            // Ohne diese Zeile würde die Animation nach einem Bild stehen bleiben.
-            StartAnimationLoop(topLevel);
-        });
+        }
+        RequestAnimationFrame(Animate);
     }
 
-    // Windows spezifischer Code, um das Fenster in den Preview-Modus zu versetzen
-    [DllImport("user32.dll")]
-    private static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
-
-    [DllImport("user32.dll")]
-    private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-
-    public static Avalonia.Media.Imaging.Bitmap? GetLogoBitmap()
+    internal void AdvanceScene(double seconds)
     {
-        // Falls das Logo noch nicht geladen wurde, laden wir es hier kurz nach
-        if (_logogs == null)
-        {
-            // Passe den Pfad hier an deinen Asset-Pfad an!
-            var assets = Avalonia.Platform.AssetLoader.Open(new Uri("avares://GruetzeToaster/Assets/logogs.png"));
-            _logogs = new Avalonia.Media.Imaging.Bitmap(assets);
-        }
-        return _logogs;
+        Scene.Advance(Bounds.Width, Bounds.Height, seconds);
     }
 
     protected override void OnOpened(EventArgs e)
     {
         base.OnOpened(e);
-
-        if (IsPreviewMode && ParentWindowHandle != IntPtr.Zero)
+        if (IsPreviewMode)
         {
-            var platformHandle = this.TryGetPlatformHandle();
-            if (platformHandle != null)
-            {
-                // Win32 Magie: Das Fenster zum "Kind" des Windows-Dialogs machen
-                SetWindowLong(platformHandle.Handle, -16, 0x40000000); // WS_CHILD
-                SetParent(platformHandle.Handle, ParentWindowHandle);
-                
-                this.WindowState = WindowState.Normal;
-                this.Position = new PixelPoint(0, 0);
-                
-                this.Width = 160; 
-                this.Height = 120;
-            }
+            if (!OperatingSystem.IsWindows() || ParentWindowHandle == IntPtr.Zero || !IsWindow(ParentWindowHandle))
+            { Close(); return; }
+            var handle = TryGetPlatformHandle();
+            if (handle == null || !GetClientRect(ParentWindowHandle, out var rect)) { Close(); return; }
+            int style = GetWindowLong(handle.Handle, -16);
+            SetWindowLong(handle.Handle, -16, (style & ~unchecked((int)0x80000000)) | 0x40000000);
+            SetParent(handle.Handle, ParentWindowHandle);
+            SetWindowPos(handle.Handle, IntPtr.Zero, 0, 0, rect.Right, rect.Bottom, 0x0014);
+            Width = rect.Right / RenderScaling;
+            Height = rect.Bottom / RenderScaling;
         }
+        else if (!_windowed) WindowState = WindowState.FullScreen;
+        InitializeObjects();
+        _running = true;
+        RequestAnimationFrame(Animate);
     }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        _running = false;
+        Scene.Clear();
+        base.OnClosed(e);
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct NativeRect { public int Left, Top, Right, Bottom; }
+    [DllImport("user32.dll")] private static extern bool IsWindow(IntPtr hWnd);
+    [DllImport("user32.dll")] private static extern bool GetClientRect(IntPtr hWnd, out NativeRect rect);
+    [DllImport("user32.dll")] private static extern IntPtr SetParent(IntPtr child, IntPtr parent);
+    [DllImport("user32.dll")] private static extern int GetWindowLong(IntPtr hWnd, int index);
+    [DllImport("user32.dll")] private static extern int SetWindowLong(IntPtr hWnd, int index, int value);
+    [DllImport("user32.dll")] private static extern bool SetWindowPos(IntPtr hWnd, IntPtr after,
+        int x, int y, int width, int height, uint flags);
 }

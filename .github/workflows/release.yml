@@ -1,0 +1,103 @@
+name: Release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet test GruetzeToaster.sln -c Release
+  package:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows
+            arch: x64
+          - os: ubuntu-24.04
+            platform: linux
+            arch: x64
+          - os: ubuntu-24.04
+            platform: linux
+            arch: arm64
+          - os: macos-latest
+            platform: macos
+            arch: arm64
+          - os: macos-latest
+            platform: macos
+            arch: x64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Verify release version
+        shell: pwsh
+        run: |
+          $version = dotnet msbuild GruetzeToaster/GruetzeToaster.csproj -nologo -getProperty:Version
+          if ($env:GITHUB_REF_TYPE -ne 'tag' -or $env:GITHUB_REF_NAME -ne "v$version") { throw 'Run this workflow on the version tag.' }
+      - name: Windows package
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: |
+          ./scripts/build-windows.ps1 -SelfContained
+          dotnet artifacts/windows-local/gruetzetoaster.dll --help
+          if ($LASTEXITCODE -ne 0) { throw 'CLI smoke test failed.' }
+          $version = dotnet msbuild GruetzeToaster/GruetzeToaster.csproj -nologo -getProperty:Version
+          Compress-Archive -Path artifacts/windows-local/* -DestinationPath "artifacts/GruetzeToaster-$version-windows-x64.zip"
+      - name: Linux packages
+        if: matrix.platform == 'linux'
+        run: bash scripts/build-linux.sh ${{ matrix.arch }}
+      - name: Linux CLI smoke test
+        if: matrix.platform == 'linux' && matrix.arch == 'x64'
+        shell: bash
+        run: |
+          mkdir artifacts/smoke
+          tar -xzf artifacts/GruetzeToaster-*-linux-x64.tar.gz -C artifacts/smoke
+          artifacts/smoke/gruetzetoaster --help
+      - name: macOS bundle
+        if: matrix.platform == 'macos'
+        run: bash scripts/build-macos.sh ${{ matrix.arch }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: package-${{ matrix.platform }}-${{ matrix.arch }}
+          if-no-files-found: error
+          path: |
+            artifacts/GruetzeToaster-*.zip
+            artifacts/GruetzeToaster-*.tar.gz
+            artifacts/GruetzeToaster-*.deb
+  draft:
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: package-*
+          path: release
+          merge-multiple: true
+      - name: Create reviewed release draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          cp docs/images/screensaver.png release/GruetzeToaster-1.1.0-screenshot.png
+          cp GruetzeToaster/Assets/app-icon.png release/GruetzeToaster-1.1.0-icon.png
+          (cd release && sha256sum * > SHA256SUMS.txt)
+          gh release create "$GITHUB_REF_NAME" release/* --verify-tag --draft --title "GruetzeToaster ${GITHUB_REF_NAME#v}" --notes-file docs/releases/1.1.0.md

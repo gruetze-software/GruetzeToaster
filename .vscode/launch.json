@@ -6,7 +6,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/GruetzeToaster/bin/Debug/net9.0/GruetzeToaster.dll",
+            "program": "${workspaceFolder}/GruetzeToaster/bin/Debug/net10.0/gruetzetoaster.dll",
             "args": ["/c"],
             "cwd": "${workspaceFolder}/GruetzeToaster",
             "console": "internalConsole",

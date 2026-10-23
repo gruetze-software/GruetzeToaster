@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 
@@ -7,80 +6,74 @@ namespace GruetzeToaster;
 
 public class ToasterSettings
 {
+    public const int MinCount = 1, MaxCount = 200;
+    public const double MinSpeed = 0.2, MaxSpeed = 5;
     public int ToasterCount { get; set; } = 35;
-    public double SpeedMultiplier { get; set; } = 1.0;
-    public bool ShowFps { get; set; } = false;
+    public double SpeedMultiplier { get; set; } = 1;
+    public bool ShowFps { get; set; }
+    public bool ShowC64 { get; set; }
+    public bool ShowAmiga { get; set; }
+
+    public void Validate()
+    {
+        ToasterCount = Math.Clamp(ToasterCount, MinCount, MaxCount);
+        SpeedMultiplier = double.IsFinite(SpeedMultiplier)
+            ? Math.Clamp(SpeedMultiplier, MinSpeed, MaxSpeed) : 1;
+    }
 }
 
 public class ConfigManager
 {
-    public ToasterSettings Settings { get; set; } = new ToasterSettings();
-    
-    // Statischer Pfad für den einfachen Zugriff
-    private static string ConfigPath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), 
-        "GruetzeToaster", "settings.json");
+    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    public ToasterSettings Settings { get; set; } = new();
+    public string ConfigPath { get; }
+    public string? LastError { get; private set; }
 
-    public ConfigManager()
+    public ConfigManager(string? configPath = null)
     {
-        ConfigPath = SetConfigPath();
+        ConfigPath = configPath ?? Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "GruetzeToaster", "settings.json");
         LoadSettings();
-    }
-
-    private static string SetConfigPath()
-    {
-        // Versuche den Standard-Pfad (~/.config unter Linux, %AppData% unter Windows)
-        string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-
-        // Fallback für WSL/Linux, falls SpecialFolder leer zurückkommt
-        if (string.IsNullOrEmpty(appData))
-        {
-            // Nutzt $HOME/.config als Standard-Linux-Konvention
-            appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config");
-        }
-
-        return Path.Combine(appData, "GruetzeToaster", "settings.json");
     }
 
     public void LoadSettings()
     {
-        try 
+        LastError = null;
+        Settings = new();
+        try
         {
-            if (File.Exists(ConfigPath)) 
-            {
-                Trace.WriteLine("");
-                Trace.WriteLine($"Lade Einstellungen von: {ConfigPath}");
-                string json = File.ReadAllText(ConfigPath);
-                Settings = JsonSerializer.Deserialize<ToasterSettings>(json) ?? new ToasterSettings();
-            }
-            else
-            {
-                Trace.WriteLine("");
-                Trace.WriteLine("Keine Einstellungen gefunden, verwende Standardwerte.");
-                Settings = new ToasterSettings();
-                SaveSettings(); // Speichern der Standardwerte für die Zukunft
-            }
-        } 
-        catch (Exception ex) 
-        {
-            Trace.WriteLine($"Fehler beim Laden: {Tools.GetExcMsg(ex)}");
-            Settings = new ToasterSettings(); 
+            if (File.Exists(ConfigPath))
+                Settings = JsonSerializer.Deserialize<ToasterSettings>(File.ReadAllText(ConfigPath)) ?? new();
+            Settings.Validate();
         }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
+        { LastError = Tools.GetExcMsg(ex); }
     }
 
-    public void SaveSettings()
+    public bool SaveSettings()
     {
-        try 
+        LastError = null;
+        string? temporaryPath = null;
+        try
         {
-            string? directory = Path.GetDirectoryName(ConfigPath);
-            if (directory != null) Directory.CreateDirectory(directory);
-            Trace.WriteLine($"Speichere Einstellungen nach: {ConfigPath}");
-            string json = JsonSerializer.Serialize(Settings, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(ConfigPath, json);
+            Settings.Validate();
+            string fullPath = Path.GetFullPath(ConfigPath);
+            Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
+            temporaryPath = fullPath + "." + Guid.NewGuid().ToString("N") + ".tmp";
+            File.WriteAllText(temporaryPath, JsonSerializer.Serialize(Settings, JsonOptions));
+            File.Move(temporaryPath, fullPath, overwrite: true);
+            return true;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
+        { LastError = Tools.GetExcMsg(ex); return false; }
+        finally
         {
-            Trace.WriteLine($"Fehler beim Speichern: {Tools.GetExcMsg(ex)}");
+            if (temporaryPath != null)
+            {
+                try { File.Delete(temporaryPath); }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+            }
         }
     }
 }

@@ -1,0 +1,23 @@
+[Desktop Entry]
+Type=Application
+Name=GruetzeToaster
+Comment=Retro flying toaster animation
+Exec=gruetzetoaster --settings
+Icon=de.gruetze_software.GruetzeToaster
+Terminal=false
+Categories=Game;Amusement;
+StartupWMClass=gruetzetoaster
+Actions=Windowed;Fullscreen;About;
+
+[Desktop Action Windowed]
+Name=Windowed animation
+Exec=gruetzetoaster --windowed
+
+[Desktop Action Fullscreen]
+Name=Fullscreen animation
+Exec=gruetzetoaster --fullscreen
+
+[Desktop Action About]
+Name=About GruetzeToaster
+Exec=gruetzetoaster --about
+
