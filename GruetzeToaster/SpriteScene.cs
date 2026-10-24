@@ -13,6 +13,10 @@ public sealed class SpriteScene : Control
     private readonly List<FlyingObject> _objects = new();
     private FlyingObject[] _renderOrder = [];
     private Random _random = Random.Shared;
+    private bool _showStars;
+    private StreamGeometry? _stars;
+    private Size _starSize;
+    private static readonly IBrush StarBrush = new SolidColorBrush(Color.Parse("#71818F"));
     internal int ObjectCount => _objects.Count;
     internal int CountKind(SpriteKind kind)
     {
@@ -35,8 +39,9 @@ public sealed class SpriteScene : Control
         Clear();
         _random = random;
         SpriteAssets.Instance.PrepareScene();
+        _showStars = settings.ShowStars;
         var pool = SpriteCatalog.GetSpawnPool(settings);
-        int count = preview ? 12 : settings.ToasterCount;
+        int count = pool.Count == 0 ? 0 : preview ? 12 : settings.ToasterCount;
         var kinds = new SpriteKind[count];
         for (int i = 0; i < count; i++) kinds[i] = pool[random.Next(pool.Count)];
         // A scene keeps its selected kinds on respawn, so a missing computer would never appear.
@@ -88,6 +93,11 @@ public sealed class SpriteScene : Control
     public override void Render(DrawingContext context)
     {
         base.Render(context);
+        if (_showStars && Bounds.Width > 0 && Bounds.Height > 0)
+        {
+            if (_stars == null || _starSize != Bounds.Size) PrepareStars(Bounds.Size);
+            context.DrawGeometry(StarBrush, null, _stars!);
+        }
         if (_renderOrder.Length == 0) return;
         var assets = SpriteAssets.Instance;
         foreach (var sprite in _renderOrder)
@@ -105,6 +115,31 @@ public sealed class SpriteScene : Control
         _objects.Clear();
         _renderOrder = [];
         AnimationSeconds = 0;
+        _showStars = false;
+        _stars = null;
         InvalidateVisual();
+    }
+
+    private void PrepareStars(Size size)
+    {
+        // A fixed, cached batch of tiny dots: no per-star controls, timers or frame allocations.
+        var random = new Random(1985);
+        var geometry = new StreamGeometry();
+        using (var path = geometry.Open())
+        {
+            for (int i = 0; i < 80; i++)
+            {
+                double dot = i % 5 == 0 ? 1.6 : 1;
+                double x = random.NextDouble() * Math.Max(0, size.Width - dot);
+                double y = random.NextDouble() * Math.Max(0, size.Height - dot);
+                path.BeginFigure(new Point(x, y), true);
+                path.LineTo(new Point(x + dot, y));
+                path.LineTo(new Point(x + dot, y + dot));
+                path.LineTo(new Point(x, y + dot));
+                path.EndFigure(true);
+            }
+        }
+        _starSize = size;
+        _stars = geometry;
     }
 }

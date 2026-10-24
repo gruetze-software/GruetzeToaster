@@ -5,18 +5,18 @@
         Title="GruetzeToaster · Settings" Icon="/Assets/app-icon.ico"
         Width="720" MinWidth="620" SizeToContent="Height"
         WindowStartupLocation="CenterScreen">
-    <Grid RowDefinitions="Auto,Auto,Auto" Margin="28">
-        <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,22">
+    <Grid RowDefinitions="Auto,Auto,Auto" Margin="24">
+        <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,16">
             <StackPanel Spacing="7" VerticalAlignment="Center">
                 <TextBlock Text="Settings" FontSize="25" FontWeight="SemiBold"/>
                 <TextBlock Text="Make the flying toasters your own." Classes="hint"/>
             </StackPanel>
             <Image Name="LogoImage" Grid.Column="1" Width="60" Height="60" Margin="18,0,4,0"
-                   RenderOptions.BitmapInterpolationMode="None"/>
+                   RenderOptions.BitmapInterpolationMode="HighQuality"/>
         </Grid>
-        <StackPanel Grid.Row="1" Spacing="16">
+        <StackPanel Grid.Row="1" Spacing="12">
             <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
-                <Border Classes="card">
+                <Border Classes="card" Padding="14">
                     <StackPanel Spacing="9">
                         <Grid ColumnDefinitions="*,Auto">
                             <TextBlock Text="Number of objects" FontWeight="SemiBold" VerticalAlignment="Center"/>
@@ -29,7 +29,7 @@
                         <TextBlock Text="1 to 200 objects per screen." Classes="hint"/>
                     </StackPanel>
                 </Border>
-                <Border Grid.Column="1" Classes="card">
+                <Border Grid.Column="1" Classes="card" Padding="14">
                     <StackPanel Spacing="9">
                         <Grid ColumnDefinitions="*,Auto">
                             <TextBlock Text="Speed" FontWeight="SemiBold" VerticalAlignment="Center"/>
@@ -42,20 +42,25 @@
                     </StackPanel>
                 </Border>
             </Grid>
-            <Border Classes="card">
+            <Border Classes="card" Padding="14">
                 <StackPanel Spacing="5">
-                    <TextBlock Text="Retro companions" FontWeight="SemiBold" Margin="0,0,0,3"/>
-                    <Grid ColumnDefinitions="*,*">
-                        <CheckBox Name="C64CheckBox" Content="Include C64-inspired computer"/>
-                        <CheckBox Grid.Column="1" Name="AmigaCheckBox" Content="Include Amiga-inspired computer"/>
+                    <TextBlock Text="Visible objects" FontWeight="SemiBold" Margin="0,0,0,3"/>
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto">
+                        <CheckBox Name="ToastersCheckBox" Content="Propeller toasters"/>
+                        <CheckBox Grid.Column="1" Name="ToastCheckBox" Content="Toast"/>
+                        <CheckBox Grid.Row="1" Name="FloppiesCheckBox" Content="Floppy disks"/>
+                        <CheckBox Grid.Row="1" Grid.Column="1" Name="LogoCheckBox" Content="Logo computers"/>
+                        <CheckBox Grid.Row="2" Name="C64CheckBox" Content="C64-inspired computer"/>
+                        <CheckBox Grid.Row="2" Grid.Column="1" Name="AmigaCheckBox" Content="Amiga-inspired computer"/>
                     </Grid>
-                    <TextBlock Text="Blinking red light on the C64; a sliding floppy disk on the Amiga."
+                    <TextBlock Text="All types share the object count. Turn off every type for background only."
                                Classes="hint"/>
                 </StackPanel>
             </Border>
-            <Border Classes="card">
+            <Border Classes="card" Padding="14">
                 <StackPanel Spacing="5">
                     <CheckBox Name="FpsCheckBox" Content="Show frame rate on startup"/>
+                    <CheckBox Name="StarsCheckBox" Content="Show small background stars"/>
                     <TextBlock Text="Press F during the animation to toggle the frame rate display."
                                Classes="hint" Margin="28,0,0,0"/>
                 </StackPanel>
@@ -67,7 +72,7 @@
             </Grid>
             <TextBlock Name="StatusLabel" Foreground="#FFCC80" TextWrapping="Wrap"/>
         </StackPanel>
-        <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto" Margin="0,22,0,0">
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto" Margin="0,14,0,0">
             <Button Classes="icon" Content="Reset" Click="Reset_Click" HorizontalAlignment="Left"
                     ui:ButtonIcons.Icon="{x:Static ui:ButtonIcons.Reset}"/>
             <Button Grid.Column="1" Classes="icon" Content="Cancel" Click="Cancel_Click" IsCancel="True"

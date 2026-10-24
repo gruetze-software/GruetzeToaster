@@ -17,8 +17,10 @@ public sealed class SettingsTests : IDisposable
         Assert.Equal(35, manager.Settings.ToasterCount);
         Assert.Null(manager.LastError);
         Assert.False(File.Exists(ConfigPath));
-        Assert.False(manager.Settings.ShowC64);
-        Assert.False(manager.Settings.ShowAmiga);
+        Assert.True(manager.Settings.ShowC64);
+        Assert.True(manager.Settings.ShowAmiga);
+        Assert.True(manager.Settings.ShowToasters && manager.Settings.ShowToast && manager.Settings.ShowFloppies && manager.Settings.ShowLogo);
+        Assert.False(manager.Settings.ShowStars);
     }
 
     [Theory]
@@ -55,7 +57,8 @@ public sealed class SettingsTests : IDisposable
     public void SaveRoundTripsAndLeavesNoTemporaryFiles()
     {
         var manager = new ConfigManager(ConfigPath);
-        manager.Settings = new() { ToasterCount = 42, SpeedMultiplier = 2.5, ShowFps = true, ShowC64 = true, ShowAmiga = true };
+        manager.Settings = new() { ToasterCount = 42, SpeedMultiplier = 2.5, ShowFps = true, ShowC64 = true, ShowAmiga = true,
+            ShowToasters = false, ShowToast = false, ShowFloppies = false, ShowLogo = false, ShowStars = true };
         Assert.True(manager.SaveSettings(), manager.LastError);
         manager.Settings.ToasterCount = 43;
         Assert.True(manager.SaveSettings(), manager.LastError);
@@ -65,6 +68,8 @@ public sealed class SettingsTests : IDisposable
         Assert.True(loaded.Settings.ShowFps);
         Assert.True(loaded.Settings.ShowC64);
         Assert.True(loaded.Settings.ShowAmiga);
+        Assert.False(loaded.Settings.ShowToasters || loaded.Settings.ShowToast || loaded.Settings.ShowFloppies || loaded.Settings.ShowLogo);
+        Assert.True(loaded.Settings.ShowStars);
         Assert.Single(Directory.GetFiles(_directory));
     }
 

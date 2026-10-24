@@ -8,6 +8,17 @@ using GruetzeToaster;
 // A repeatable CPU/software-rendering workload, not a GPU/vsync or display-smoothness test.
 AppBuilder.Configure<App>().UseSkia().UseHarfBuzz().WithInterFont()
     .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false }).SetupWithoutStarting();
+if (args.Length > 0 && args[0] == "--icon-master")
+{
+    string iconPath = args.Length > 1 ? args[1] : "branding/gruetzetoaster.png";
+    using var target = new RenderTargetBitmap(new PixelSize(1024, 1024), new Vector(96, 96));
+    using (var context = target.CreateDrawingContext())
+        SpriteAssets.Instance.Draw(context, SpriteKind.Toaster, new Rect(-100, -180, 1224, 1224), 0.04);
+    Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(iconPath))!);
+    target.Save(iconPath, PngBitmapEncoderOptions.Default);
+    Console.WriteLine($"Propeller toaster icon saved to {iconPath}");
+    return;
+}
 if (args.Length > 0 && args[0] == "--screenshot")
 {
     string screenshotPath = args.Length > 1 ? args[1] : "docs/images/screensaver.png";

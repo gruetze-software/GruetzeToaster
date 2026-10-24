@@ -17,7 +17,7 @@
   <content_rating type="oars-1.1"/>
   <screenshots><screenshot type="default">
     <caption>Flying propeller toasters, toast, floppy disks and optional retro computers</caption>
-    <image>https://raw.githubusercontent.com/gruetze-software/GruetzeToaster/v1.1.0/docs/images/screensaver.png</image>
+    <image>https://raw.githubusercontent.com/gruetze-software/GruetzeToaster/v1.2.0/docs/images/screensaver.png</image>
   </screenshot></screenshots>
-  <releases><release version="1.1.0" date="2026-10-23"/></releases>
+  <releases><release version="1.2.0" date="2026-10-24"/></releases>
 </component>

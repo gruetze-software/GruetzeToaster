@@ -97,7 +97,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          cp docs/images/screensaver.png release/GruetzeToaster-1.1.0-screenshot.png
-          cp GruetzeToaster/Assets/app-icon.png release/GruetzeToaster-1.1.0-icon.png
-          (cd release && sha256sum * > SHA256SUMS.txt)
-          gh release create "$GITHUB_REF_NAME" release/* --verify-tag --draft --title "GruetzeToaster ${GITHUB_REF_NAME#v}" --notes-file docs/releases/1.1.0.md
+          version="${GITHUB_REF_NAME#v}"
+          gh release create "$GITHUB_REF_NAME" release/*.zip release/*.tar.gz release/*.deb --verify-tag --draft --title "GruetzeToaster $version" --notes-file "docs/releases/$version.md"

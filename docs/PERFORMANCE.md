@@ -43,4 +43,4 @@ Recreate it after changing artwork:
 dotnet run --project tools/PerformanceProbe -c Release -- --screenshot docs/images/screensaver.png
 ```
 
-The Windows build script includes the same image in its output for release use.
+The screenshot stays in the repository and README; releases attach application packages only.

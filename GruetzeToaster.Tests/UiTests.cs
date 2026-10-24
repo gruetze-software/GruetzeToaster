@@ -35,9 +35,32 @@ public class UiTests
             Assert.Equal(1, scene.CountKind(SpriteKind.C64));
             Assert.Equal(1, scene.CountKind(SpriteKind.Amiga));
         }
-        scene.Initialize(new() { ToasterCount = 35 }, false, 960, 600, new Random(42));
+        scene.Initialize(new() { ToasterCount = 35, ShowC64 = false, ShowAmiga = false }, false, 960, 600, new Random(42));
         Assert.Equal(0, scene.CountKind(SpriteKind.C64));
         Assert.Equal(0, scene.CountKind(SpriteKind.Amiga));
+        scene.Clear();
+    }
+
+    [AvaloniaFact]
+    public void StarsRenderWithoutObjectsAndCanBeTurnedOff()
+    {
+        var settings = new ToasterSettings { ShowToasters = false, ShowToast = false, ShowFloppies = false,
+            ShowLogo = false, ShowC64 = false, ShowAmiga = false, ShowStars = true };
+        var scene = new SpriteScene();
+        scene.Measure(new Size(960, 600));
+        scene.Arrange(new Rect(0, 0, 960, 600));
+        byte[] Render(bool stars)
+        {
+            settings.ShowStars = stars;
+            scene.Initialize(settings, false, 960, 600, new Random(1));
+            Assert.Equal(0, scene.ObjectCount);
+            using var bitmap = new RenderTargetBitmap(new PixelSize(960, 600));
+            using (var context = bitmap.CreateDrawingContext()) scene.Render(context);
+            using var stream = new MemoryStream();
+            bitmap.Save(stream, PngBitmapEncoderOptions.Default);
+            return stream.ToArray();
+        }
+        Assert.False(Render(true).SequenceEqual(Render(false)));
         scene.Clear();
     }
 

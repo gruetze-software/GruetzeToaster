@@ -20,9 +20,6 @@ mkdir -p "$APP/Contents/Resources/docs"
 cp "$ROOT/docs/ARTWORK-RIGHTS.md" "$APP/Contents/Resources/docs/"
 cp "$ROOT/docs/artwork-prompts.json" "$APP/Contents/Resources/docs/"
 cp "$ROOT/docs/PERFORMANCE.md" "$APP/Contents/Resources/docs/"
-mkdir -p "$APP/Contents/Resources/docs/images" "$APP/Contents/Resources/GruetzeToaster/Assets"
-cp "$ROOT/docs/images/screensaver.png" "$APP/Contents/Resources/docs/images/"
-cp "$ROOT/GruetzeToaster/Assets/app-icon.png" "$APP/Contents/Resources/GruetzeToaster/Assets/"
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

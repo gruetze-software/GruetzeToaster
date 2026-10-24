@@ -16,6 +16,7 @@ internal sealed class SpriteAssets : IDisposable
     private Bitmap? _toasterBody, _rotor, _toast, _c64Atlas, _amiga, _disk;
     private readonly StreamGeometry _diskOpening = CreateDiskOpening();
     public Bitmap Logo { get; }
+    public Bitmap AppLogo { get; }
     public Bitmap CompanyLogo { get; }
     internal long TextureBytes
     {
@@ -30,6 +31,7 @@ internal sealed class SpriteAssets : IDisposable
     private SpriteAssets()
     {
         Logo = Own(Decode("logo.gif"));
+        AppLogo = Own(Decode("app-logo.png", 256));
         CompanyLogo = Own(Decode("logogs.png", 128));
     }
 

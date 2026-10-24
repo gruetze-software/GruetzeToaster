@@ -12,7 +12,9 @@ Updated 2026-10-23.
 - `Assets/Artwork/wedge-computer.png`: newly drawn recognizable Amiga 500-style computer with a model wordmark.
 - `Assets/Artwork/floppy-disk.png`: newly generated disk, composed with the wedge computer for the insertion/ejection animation.
 - `Assets/logo.gif` and `Assets/logogs.png`: existing project-owner-supplied computer and company logos.
-- `Assets/app-icon.png/.ico/.icns`: technical conversions of the owner's `logo.gif`, as requested.
+- `branding/gruetzetoaster.png`: static rendering of the project's turquoise toaster and orange propeller,
+  exported directly from the scene renderer. It replaces the earlier computer-icon proposal.
+- `Assets/app-logo.png` and `Assets/app-icon.png/.ico/.icns`: technical conversions of that toaster master.
 
 The five new sprite assets were created using the built-in image_gen tool.
 The initial generations used text prompts only, with no original After Dark sprites or other reference images.

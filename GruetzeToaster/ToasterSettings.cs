@@ -11,8 +11,13 @@ public class ToasterSettings
     public int ToasterCount { get; set; } = 35;
     public double SpeedMultiplier { get; set; } = 1;
     public bool ShowFps { get; set; }
-    public bool ShowC64 { get; set; }
-    public bool ShowAmiga { get; set; }
+    public bool ShowToasters { get; set; } = true;
+    public bool ShowToast { get; set; } = true;
+    public bool ShowFloppies { get; set; } = true;
+    public bool ShowLogo { get; set; } = true;
+    public bool ShowC64 { get; set; } = true;
+    public bool ShowAmiga { get; set; } = true;
+    public bool ShowStars { get; set; }
 
     public void Validate()
     {

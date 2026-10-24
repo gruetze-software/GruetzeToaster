@@ -14,10 +14,6 @@ New-Item -ItemType Directory -Force (Join-Path $output 'docs') | Out-Null
 Copy-Item -LiteralPath (Join-Path $repoRoot 'docs/ARTWORK-RIGHTS.md') -Destination (Join-Path $output 'docs/ARTWORK-RIGHTS.md')
 Copy-Item -LiteralPath (Join-Path $repoRoot 'docs/artwork-prompts.json') -Destination (Join-Path $output 'docs/artwork-prompts.json')
 Copy-Item -LiteralPath (Join-Path $repoRoot 'docs/PERFORMANCE.md') -Destination (Join-Path $output 'docs/PERFORMANCE.md')
-New-Item -ItemType Directory -Force (Join-Path $output 'docs/images') | Out-Null
-Copy-Item -LiteralPath (Join-Path $repoRoot 'docs/images/screensaver.png') -Destination (Join-Path $output 'docs/images/screensaver.png')
-New-Item -ItemType Directory -Force (Join-Path $output 'GruetzeToaster/Assets') | Out-Null
-Copy-Item -LiteralPath (Join-Path $repoRoot 'GruetzeToaster/Assets/app-icon.png') -Destination (Join-Path $output 'GruetzeToaster/Assets/app-icon.png')
 $modes = @{ 'Settings'='--settings'; 'About'='--about'; 'Windowed'='--windowed'; 'Fullscreen'='--fullscreen' }
 foreach ($entry in $modes.GetEnumerator()) {
     $launcher = "@echo off`r`nstart `"`" `"%~dp0gruetzetoaster.exe`" " + $entry.Value + "`r`n"

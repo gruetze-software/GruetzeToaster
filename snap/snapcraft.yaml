@@ -1,7 +1,7 @@
 name: gruetzetoaster
 title: GruetzeToaster
 base: core24
-version: '1.1.0'
+version: '1.2.0'
 grade: devel
 confinement: strict
 license: MIT
@@ -12,7 +12,7 @@ description: |
   Optional retro computers feature a blinking red power light and a sliding floppy disk.
   This application does not lock the session or install a native Linux screensaver.
   Support development: https://ko-fi.com/gruetzesoftware
-website: https://github.com/gruetze-software/GruetzeToaster
+website: https://www.gruetze-software.de
 source-code: https://github.com/gruetze-software/GruetzeToaster
 issues: https://github.com/gruetze-software/GruetzeToaster/issues
 icon: GruetzeToaster/Assets/app-icon.png

@@ -145,8 +145,8 @@ public partial class MainWindow : Window
         }
         else if (!_windowed) WindowState = WindowState.FullScreen;
         InitializeObjects();
-        _running = true;
-        RequestAnimationFrame(_frameCallback);
+        _running = Scene.ObjectCount > 0;
+        if (_running) RequestAnimationFrame(_frameCallback);
     }
 
     protected override void OnClosed(EventArgs e)

@@ -9,14 +9,17 @@
         <Border>
             <StackPanel Spacing="12" Margin="18,0,18,4">
                 <Image Name="ProductLogo" Width="72" Height="72" HorizontalAlignment="Center"
-                       RenderOptions.BitmapInterpolationMode="None"/>
+                       RenderOptions.BitmapInterpolationMode="HighQuality"/>
                 <TextBlock Name="ProductName" FontSize="28" FontWeight="SemiBold" HorizontalAlignment="Center"/>
                 <TextBlock Text="Propeller toasters. Retro computers. Pure nostalgia." FontSize="15" TextAlignment="Center"/>
                 <TextBlock Text="Original pixel-art toasters, toast and optional home computers drifting across your screen."
                            TextWrapping="Wrap" TextAlignment="Center" Foreground="#A5B5BD" Margin="8,0"/>
                 <Separator Margin="0,6" Background="#34434C"/>
                 <Grid ColumnDefinitions="100,*" Margin="12,0">
-                    <Image Name="CompanyLogo" Width="88" Height="88" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+                    <Border Width="88" Height="88" CornerRadius="10" Background="#193C4C"
+                            BorderBrush="#3D6977" BorderThickness="1" Padding="7">
+                        <Image Name="CompanyLogo" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+                    </Border>
                     <StackPanel Grid.Column="1" Spacing="5" VerticalAlignment="Center" Margin="12,0,0,0">
                         <TextBlock Text="Developed by" Classes="hint"/>
                         <TextBlock Text="Grütze-Software" FontSize="19" FontWeight="SemiBold"/>
@@ -26,9 +29,12 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10" Margin="0,6">
                     <Button Classes="icon" Content="GitHub Project" Tag="https://github.com/gruetze-software/GruetzeToaster"
                             Click="OpenLink" ui:ButtonIcons.Icon="{x:Static ui:ButtonIcons.Code}"/>
-                    <Button Classes="icon" Content="Grütze-Software" Tag="https://github.com/gruetze-software"
+                    <Button Classes="icon" Content="Grütze-Software" Tag="https://www.gruetze-software.de"
                             Click="OpenLink" ui:ButtonIcons.Icon="{x:Static ui:ButtonIcons.External}"/>
                 </StackPanel>
+                <Button Classes="icon" Content="Bugs &amp; feature requests" Tag="https://github.com/gruetze-software/GruetzeToaster/issues"
+                        Click="OpenLink" HorizontalAlignment="Center" MinHeight="30" Padding="12,4"
+                        ui:ButtonIcons.Icon="{x:Static ui:ButtonIcons.External}"/>
                 <Separator Margin="0,2" Background="#34434C"/>
                 <TextBlock Text="Enjoying GruetzeToaster? A voluntary coffee helps support its development."
                            TextWrapping="Wrap" TextAlignment="Center" Margin="8,2"/>

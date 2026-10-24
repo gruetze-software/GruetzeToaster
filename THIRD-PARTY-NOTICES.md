@@ -16,6 +16,7 @@ Tests additionally use xUnit and Microsoft.NET.Test.Sdk; these are not part of a
 
 The current toaster, toast, breadbox computer, wedge computer and disk sprites were newly generated for this project.
 The earlier reconstructed toaster/toast files are no longer included in build resources.
-The company logos were supplied by the project owner. The app icon is a conversion of the owner's logo computer.
+The company logos were supplied by the project owner. The app icon is a static rendering of the
+project's turquoise propeller toaster, using the same artwork and rotor as the animation.
 See [the artwork provenance record](docs/ARTWORK-RIGHTS.md) and [generation prompts](docs/artwork-prompts.json).
 A complete copy of applicable upstream license texts should accompany public release packages.

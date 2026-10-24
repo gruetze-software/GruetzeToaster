@@ -11,7 +11,7 @@ public partial class AboutWindow : Window
         InitializeComponent();
         ProductName.Text = AppInfo.DisplayName;
         FrameworkInfo.Text = $"C# · .NET {Environment.Version.Major} · Avalonia {AppInfo.AvaloniaVersion}\nWindows · Linux · macOS";
-        ProductLogo.Source = SpriteAssets.Instance.Logo;
+        ProductLogo.Source = SpriteAssets.Instance.AppLogo;
         CompanyLogo.Source = SpriteAssets.Instance.CompanyLogo;
     }
 
@@ -20,7 +20,8 @@ public partial class AboutWindow : Window
     private async void OpenLink(object? sender, RoutedEventArgs e)
     {
         if (sender is not Button { Tag: string target } ||
-            (target != AppInfo.RepositoryUrl && target != AppInfo.CompanyUrl && target != AppInfo.KofiUrl)) return;
+            (target != AppInfo.RepositoryUrl && target != AppInfo.CompanyUrl && target != AppInfo.KofiUrl &&
+             target != AppInfo.IssuesUrl)) return;
         try
         {
             LinkStatus.Text = await Launcher.LaunchUriAsync(new Uri(target))
